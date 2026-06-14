@@ -1,0 +1,14 @@
+{
+  "name": "vendal-authentik-adaptor",
+  "version": "1.0.0",
+  "description": "Adaptor bridge between Authentik SMS stage and Vendel SMS gateway",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node --env-file=.env src/index.js",
+    "dev": "node --watch --env-file=.env src/index.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
