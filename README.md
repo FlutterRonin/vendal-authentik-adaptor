@@ -36,6 +36,8 @@ cp .env.example .env
 | `ADAPTOR_PASSWORD` | Password Authentik uses to authenticate with this adaptor   |
 | `VENDEL_URL`       | Base URL of your Vendel instance, e.g. `http://vendel:8090` |
 | `VENDEL_API_KEY`   | Your Vendel API key (starts with `vk_`)                     |
+| `SMS_APP_NAME`     | App name shown at the start of the SMS message              |
+| `SMS_APP_HASH`     | 11-character Android SMS Retriever hash (see below)         |
 
 ### 2. Run with Docker Compose
 
@@ -71,6 +73,33 @@ Expected response:
 ```json
 { "message_ids": ["abc123"], "status": "accepted" }
 ```
+
+## SMS message format
+
+The adaptor wraps the OTP in a message compatible with the [Android SMS Retriever API](https://developers.google.com/identity/sms-retriever/verify), enabling automatic code autofill in apps that use [`sms_autofill`](https://pub.dev/packages/sms_autofill) or similar packages.
+
+The delivered SMS looks like:
+
+```
+One Digital: Your verification code is 123456
+FA+9qCX9VSu
+```
+
+Rules enforced by the Android SMS Retriever API:
+- Under 140 bytes
+- Contains the one-time code
+- Ends with the 11-character app hash on the last line
+
+### Getting your app hash
+
+In your Flutter app, call `SmsAutoFill().getAppSignature` once to retrieve the hash tied to your app's signing certificate:
+
+```dart
+final hash = await SmsAutoFill().getAppSignature;
+print(hash); // e.g. "FA+9qCX9VSu"
+```
+
+Set the printed value as `SMS_APP_HASH` in your `.env`. Use the signing key that matches your production build (release keystore, not debug).
 
 ## Health check
 

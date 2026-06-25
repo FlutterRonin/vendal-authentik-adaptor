@@ -1,27 +1,16 @@
-/**
- * Authentik Generic SMS POST payload:
- * {
- *   "From": "<from_number>",
- *   "To": "<user_phone>",
- *   "Body": "<otp_token>"
- * }
- *
- * Vendel expects:
- * {
- *   "recipients": ["<user_phone>"],
- *   "body": "<otp_token>"
- * }
- */
+const APP_NAME = process.env.SMS_APP_NAME ?? 'App';
+const APP_HASH = process.env.SMS_APP_HASH ?? '';
+
 export function transformPayload(raw) {
-  // Authentik may send fields in any casing, handle both
   const to = raw?.To ?? raw?.to;
   const body = raw?.Body ?? raw?.body;
 
   if (!to) return { error: 'Missing "To" field in request' };
   if (!body) return { error: 'Missing "Body" field in request' };
 
-  return {
-    to,
-    body,
-  };
+  // Format required by Android SMS Retriever API:
+  // must end with the 11-character app hash on its own line
+  const message = `${APP_NAME}: Your verification code is ${body}\n${APP_HASH}`.trim();
+
+  return { to, body: message };
 }
